@@ -92,11 +92,12 @@ export default function ObligationsByAwardType({
         .attr('d', d3.arc()
             .outerRadius(outerRadius)
             .innerRadius(outerRadius - outerStrokeWidth))
-        .attr('fill', (d, i) => (
+        .attr('fill', (d, i) => outer[i].color)
+        .attr('opacity', (d, i) => (
             // Use the faded color when another section is hovered over
             ((activeType && !categoryMapping[outer[i].label[0]].includes(activeType)) && !isMobile)
-                ? outer[i].fadedColor : outer[i].color)
-        )
+                ? '25%' : '100%'
+        ))
         .attr('aria-label', (d) => `${d.data.label}: ${d3.format("($,.2f")(d.value)}`)
         .attr('role', 'listitem');
 
@@ -109,10 +110,11 @@ export default function ObligationsByAwardType({
             .outerRadius(innerRadius)
             .innerRadius(innerRadius / 2)
         )
-        .attr('fill', (d, i) => (
+        .attr('fill', (d, i) => inner[i].color)
+        .attr('opacity', (d, i) => (
             // Use the faded color when another section is hovered over
             ((activeType && activeType !== inner[i].label) && !isMobile)
-                ? inner[i].fadedColor : inner[i].color)
+                ? '25%' : '100%')
         )
         .attr('aria-label', (d) => `${d.data.label}: ${d3.format("($,.2f")(d.value)}`)
         .on('mouseenter', (d) => {
