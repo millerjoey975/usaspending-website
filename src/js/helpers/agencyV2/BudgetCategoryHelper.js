@@ -1,4 +1,4 @@
-import BaseAccountSpendingRow from 'models/v2/agency/BaseAccountSpendingRow';
+import BaseAccountSpendingRow from 'models/v2/agencyV2/BaseAccountSpendingRow';
 
 // eslint-disable-next-line import/prefer-default-export
 export const parseRows = (data, agencyObligated) => {

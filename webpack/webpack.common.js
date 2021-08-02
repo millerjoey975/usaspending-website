@@ -129,7 +129,7 @@ module.exports = {
             'process.env': {
                 ENV: process.env.ENV
                     ? JSON.stringify(process.env.ENV)
-                    : JSON.stringify('qat')
+                    : JSON.stringify('dev')
             }
         })
     ]

@@ -4,7 +4,6 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { pathDefinition } from 'helpers/agencyV2/visualizations/TotalObligationsOverTimeVisualizationHelper';
 import PropTypes from 'prop-types';
 
 const propTypes = {
@@ -22,8 +21,7 @@ const propTypes = {
         right: PropTypes.number,
         bottom: PropTypes.number,
         top: PropTypes.number
-    }),
-    scenario: PropTypes.string
+    })
 };
 
 const AreaPath = ({
@@ -40,32 +38,32 @@ const AreaPath = ({
         bottom: 0,
         right: 0,
         left: 0
-    },
-    scenario
+    }
 }) => {
     const [d, setD] = useState('');
     useEffect(() => {
         if (xScale && yScale) {
-            setD(pathDefinition(
-                data,
-                xScale,
-                xProperty,
-                padding,
-                yScale,
-                yProperty,
-                height,
-                (scenario === 'exceedsMin' || scenario === 'exceedsMaxAndMin') ? 0 : null,
-                true
-            ));
+            setD(data.reduce((path, currentItem, i, originalArray) => {
+                if (i === 0) {
+                    const updatedPath = `${path}${xScale(currentItem[xProperty]) + padding.left},${height - yScale(currentItem[yProperty]) - padding.bottom}`;
+                    return updatedPath;
+                }
+                if (originalArray.length === i + 1) {
+                    const updatedPath = `${path}L${xScale(currentItem[xProperty]) + padding.left},${height - yScale(currentItem[yProperty]) - padding.bottom}L${xScale(currentItem[xProperty]) + padding.left},${height - padding.bottom}Z`;
+                    return updatedPath;
+                }
+                const updatedPath = `${path}L${xScale(currentItem[xProperty]) + padding.left},${height - yScale(currentItem[yProperty]) - padding.bottom}`;
+                return updatedPath;
+            }, 'M'));
         }
-    }, [data, xScale, yScale, scenario]);
+    }, [data, xScale, yScale]);
+
     return (
         <g tabIndex="0">
             <desc>{`The area under the curve representative of the following periods, dates, and obligations: ${description}`}</desc>
             <path
                 className={`area-path ${classname}`}
-                d={d}
-                fill="url(#areaPathLinearGradient)" />
+                d={d} />
         </g>
     );
 };

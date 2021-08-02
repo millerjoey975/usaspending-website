@@ -4,7 +4,6 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { pathDefinition } from 'helpers/agencyV2/visualizations/TotalObligationsOverTimeVisualizationHelper';
 import PropTypes from 'prop-types';
 
 const propTypes = {
@@ -37,13 +36,21 @@ const Path = ({
 
     useEffect(() => {
         if (xScale && yScale) {
-            setD(pathDefinition(data, xScale, xProperty, padding, yScale, yProperty, height, null, false));
+            setD(data.reduce((path, currentItem, i) => {
+                if (i === 0) {
+                    const updatedPath = `${path}${xScale(currentItem[xProperty]) + padding.left},${height - yScale(currentItem[yProperty]) - padding.bottom}`;
+                    return updatedPath;
+                }
+                const updatedPath = `${path}L${xScale(currentItem[xProperty]) + padding.left},${height - yScale(currentItem[yProperty]) - padding.bottom}`;
+                return updatedPath;
+            }, 'M'));
         }
     }, [data, xScale, yScale]);
+
     return (
         <g tabIndex="0">
             <desc>{`The linear line representative of the following periods, dates, and obligations: ${description}`}</desc>
-            <path className="path" d={d} stroke="url(#pathLinearGradient)" />
+            <path className="path" d={d} />
         </g>
     );
 };

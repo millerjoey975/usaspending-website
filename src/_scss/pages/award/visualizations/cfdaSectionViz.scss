@@ -27,7 +27,7 @@
     }
   }
   .cfda-section-results {
-    @import './cfdaSectionTable';
+    @import './visualizations/cfdaSectionTable';
     @import '../shared/awardAmountsSection/charts';
     @import '../../search/results/table/tableMessages';
     .tooltip__amount--loans {

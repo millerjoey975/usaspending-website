@@ -6,15 +6,13 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import PropTypes from 'prop-types';
-import { Carousel } from 'data-transparency-ui';
+import { ComingSoon, Carousel } from 'data-transparency-ui';
 
 import { fetchBudgetaryResources } from 'apis/agencyV2';
 import BaseAgencyBudgetaryResources from 'models/v2/agency/BaseAgencyBudgetaryResources';
 import { setBudgetaryResources } from 'redux/actions/agencyV2/agencyV2Actions';
-import { calculatePercentage, formatMoneyWithUnits } from 'helpers/moneyFormatter';
 import TotalObligationsOverTimeContainer from 'containers/agencyV2/visualizations/TotalObligationsOverTimeContainer';
 import ObligationsByAwardTypeContainer from 'containers/agencyV2/visualizations/ObligationsByAwardTypeContainer';
-import RecipientDistributionContainer from 'containers/agencyV2/visualizations/RecipientDistributionContainer';
 
 import VisualizationSection from './VisualizationSection';
 import BarChart from './BarChart';
@@ -35,11 +33,7 @@ const FySummary = ({
     const dispatch = useDispatch();
     const [isLoading, setIsLoading] = useState(true);
     const [isError, setIsError] = useState(true);
-    const {
-        budgetaryResources,
-        _awardObligations,
-        recipientDistribution
-    } = useSelector((state) => state.agencyV2);
+    const { budgetaryResources: { dataByYear: resourcesByYear } } = useSelector((state) => state.agencyV2);
     const budgetaryResourcesRequest = useRef(null);
 
     useEffect(() => () => {
@@ -56,15 +50,9 @@ const FySummary = ({
             budgetaryResourcesRequest.current.promise
                 .then(({ data }) => {
                     budgetaryResourcesRequest.current = null;
-                    const dataByYear = {};
-                    data.agency_data_by_year.forEach((year) => {
-                        // Use our data model to parse the data for each FY
-                        const fyBudgetaryResources = Object.create(BaseAgencyBudgetaryResources);
-                        fyBudgetaryResources.populate(year);
-                        // Store the parsed data with the fiscal year as the key
-                        dataByYear[year.fiscal_year] = fyBudgetaryResources;
-                    });
-                    dispatch(setBudgetaryResources(dataByYear));
+                    const d = Object.create(BaseAgencyBudgetaryResources);
+                    d.populate(data, fy);
+                    dispatch(setBudgetaryResources(d));
                     setIsLoading(false);
                 })
                 .catch((e) => {
@@ -77,13 +65,15 @@ const FySummary = ({
         }
     }, [agencyId]);
 
-    const totalBudgetaryResources = budgetaryResources[fy]?.agencyBudget || '--';
-    const percentOfFederalBudget = budgetaryResources[fy]?.percentOfFederalBudget || '--';
-    const totalObligations = budgetaryResources[fy]?.agencyObligated || '--';
-    const percentOfBudgetaryResources = budgetaryResources[fy]?.percentOfAgencyBudget || '--';
-    const awardObligations = formatMoneyWithUnits(_awardObligations);
-    const percentOfTotalObligations = calculatePercentage(_awardObligations, budgetaryResources[fy]?._agencyObligated);
-    const { percentOfFederalRecipients, numberOfRecipients } = recipientDistribution;
+    // TODO eventually get this data via props or redux
+    const totalBudgetaryResources = '$1.42 Trillion';
+    const percentOfFederalBudget = '15.5%';
+    const totalObligations = '$1.11 Trillion';
+    const percentOfBudgetaryResources = '79.1%';
+    const awardObligations = '$10.62 Billion';
+    const percentOfTotalObligations = '9.4%';
+    const numberOfRecipients = '200';
+    const percentOfFederalRecipients = '1.5%';
 
     const sections = [
         (
@@ -97,8 +87,8 @@ const FySummary = ({
                     isError={isError}
                     selectedFy={fy}
                     agencyBudgetByYear={Object
-                        .entries(budgetaryResources)
-                        .map(([key, value]) => ({ year: key, budget: value._agencyBudget }))} />
+                        .entries(resourcesByYear)
+                        .map(([key, value]) => ({ year: key, budget: value.agencyBudget }))} />
             </VisualizationSection>
         ),
         (
@@ -110,8 +100,8 @@ const FySummary = ({
                 <TotalObligationsOverTimeContainer
                     isLoading={isLoading}
                     isError={isError}
-                    agencyBudget={budgetaryResources[fy]?._agencyBudget}
-                    obligationsByPeriod={budgetaryResources[fy]?.obligationsByPeriod || []} />
+                    agencyBudget={resourcesByYear[fy]?.agencyBudget}
+                    obligationsByPeriod={resourcesByYear[fy]?.obligationsByPeriod || []} />
             </VisualizationSection>
         ),
         (
@@ -129,7 +119,7 @@ const FySummary = ({
                 data={numberOfRecipients}
                 secondaryData={`${percentOfFederalRecipients} of all federal recipients`}
                 label="Recipient Award Amount Distribution" >
-                <RecipientDistributionContainer fiscalYear={fy} />
+                <ComingSoon className="viz-placeholder" />
             </VisualizationSection>
         )
     ];

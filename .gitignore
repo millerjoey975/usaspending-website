@@ -69,9 +69,5 @@ usa_spending.sh
 #redirect config
 redirect-config.json
 
-# local lighthouse DB storage
-db.sql
-
-# local lighthouse reports
 .lighthouseci/
-
+db.sql

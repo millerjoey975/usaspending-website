@@ -16,8 +16,6 @@ import { mockApiCall } from '../../testResources/mockApiHelper';
 
 mockApiCall(agencyV2, 'fetchBudgetaryResources', {});
 
-jest.mock('components/agencyV2/AgencyPage', () => jest.fn(() => null));
-
 let spy;
 
 beforeEach(() => {

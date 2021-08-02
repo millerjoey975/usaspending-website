@@ -13,6 +13,13 @@ const propTypes = {
     isLoading: PropTypes.bool
 };
 
+const TooltipComponent = () => (
+    <>
+        <h4 className="tooltip__title">Coming Soon</h4>
+        <p className="tooltip__text">The tooltip content for this section is currently under review.</p>
+    </>
+);
+
 const AgencySection = ({
     section,
     icon = "chart-area",
@@ -26,7 +33,9 @@ const AgencySection = ({
         overLine={section?.overLine}
         description={section?.overLine
             ? <span className="usda-section-title__desc">This section covers <strong>{section.overLine}</strong></span>
-            : <span className="usda-section-title__desc">This section covers <strong>Total and Award Spending</strong></span>}>
+            : <span className="usda-section-title__desc">This section covers <strong>Total and Award Spending</strong></span>}
+        descTooltip={{ component: <TooltipComponent /> }}
+        titleTooltip={{ component: <TooltipComponent /> }}>
         {children}
     </SectionTitle>
 

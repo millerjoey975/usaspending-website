@@ -8,14 +8,12 @@ import PropTypes from 'prop-types';
 import { scaleLinear } from 'd3-scale';
 import { format, getYear } from 'date-fns';
 import { formatNumber } from 'helpers/moneyFormatter';
-import { getYDomain, getMilliseconds, determineScenario } from 'helpers/agencyV2/visualizations/TotalObligationsOverTimeVisualizationHelper';
-import { xLabelHeightPlusPadding, yOffsetForPathStrokeWidth, defaultPadding, defaultHeight } from 'dataMapping/agencyV2/visualizations/totalObligationsOverTime';
+import { getYDomain, getMilliseconds } from 'helpers/agencyV2/visualizations/TotalObligationsOverTimeVisualizationHelper';
+import { xLabelHeightPlusPadding, yOffsetForPathStrokeWidth, defaultPadding } from 'dataMapping/agencyV2/visualizations/totalObligationsOverTime';
 import Paths from 'components/agencyV2/visualizations/totalObligationsOverTime/paths/Paths';
 import Axis from './axis/Axis';
 import TodayLineAndtext from './TodayLineAndtext';
 import AgencyBudgetLine from './AgencyBudgetLine';
-import ZeroLineAndTick from './ZeroLineAndTick';
-import PathAndAreaPathLinearGradients from './paths/PathAndAreaPathLinearGradients';
 
 const propTypes = {
     height: PropTypes.number,
@@ -36,7 +34,7 @@ const propTypes = {
 };
 
 const TotalObligationsOverTimeVisualization = ({
-    height = defaultHeight,
+    height = 179,
     width = 0,
     padding = defaultPadding,
     agencyBudget,
@@ -53,8 +51,6 @@ const TotalObligationsOverTimeVisualization = ({
     const [xTicks, setXTicks] = useState([]);
     const [dataWithFirstAndLastCoordinate, setDataWithFirstAndLastCoordinate] = useState([]);
     const [description, setDescription] = useState('');
-    const [scenario, setScenario] = useState('normal');
-    const [showTodayLineAndText, setShowTodayLineAndText] = useState(false);
     // x domain
     useEffect(() => {
         // start of the domain is October 1st of the prior selected fiscal year midnight local time
@@ -63,14 +59,15 @@ const TotalObligationsOverTimeVisualization = ({
         const end = new Date(`${fy}`, 8, 30);
         setXDomain([getMilliseconds(start), getMilliseconds(end)]);
     }, [fy]);
-    // add first data point as start of graph and today's date
+    // add first data point as start of graph
     useEffect(() => {
         if (xDomain.length && data.length) {
-            // add first data point
             const dataWithFirstCoordinate = [{ endDate: xDomain[0], obligated: 0 }, ...data];
-            // add todays date
+            // if today is within the domain
             if ((todaysDate >= xDomain[0]) && (todaysDate <= xDomain[1])) {
+                // if today is greater than the most recent period close date
                 if (todaysDate > dataWithFirstCoordinate[dataWithFirstCoordinate.length - 1].endDate) {
+                    // add todays date as a coordinate for drawing
                     dataWithFirstCoordinate.push({ endDate: todaysDate, obligated: dataWithFirstCoordinate[dataWithFirstCoordinate.length - 1].obligated });
                 }
             }
@@ -78,7 +75,7 @@ const TotalObligationsOverTimeVisualization = ({
         }
     }, [xDomain, data]);
     // y domain
-    useEffect(() => setYDomain(getYDomain(dataWithFirstAndLastCoordinate, agencyBudget)), [dataWithFirstAndLastCoordinate, agencyBudget]);
+    useEffect(() => setYDomain(getYDomain(data, agencyBudget)), [data, agencyBudget]);
     /**
      * set x scale
      * - The range max value removes padding left and right since that is padding for the
@@ -126,29 +123,11 @@ const TotalObligationsOverTimeVisualization = ({
         }, ''));
     }, [dataWithFirstAndLastCoordinate]);
 
-    useEffect(() => setScenario(determineScenario(agencyBudget, dataWithFirstAndLastCoordinate)), [agencyBudget, dataWithFirstAndLastCoordinate]);
-
-    useEffect(() => {
-        if ((todaysDate >= xDomain[0]) && (todaysDate <= xDomain[1])) {
-            setShowTodayLineAndText(true);
-        }
-        else {
-            setShowTodayLineAndText(false);
-        }
-    }, [xDomain, todaysDate]);
-
     return (
         <svg
             className="total-obligations-over-time-svg"
             height={height}
             width={width}>
-            <defs>
-                <PathAndAreaPathLinearGradients
-                    agencyBudget={agencyBudget}
-                    data={dataWithFirstAndLastCoordinate}
-                    padding={padding}
-                    width={width} />
-            </defs>
             <g className="total-obligations-over-time-svg-body">
                 <Paths
                     data={dataWithFirstAndLastCoordinate}
@@ -159,39 +138,28 @@ const TotalObligationsOverTimeVisualization = ({
                     yScaleForPath={yScaleForPath}
                     height={height}
                     width={width}
-                    padding={padding}
-                    agencyBudget={agencyBudget}
-                    scenario={scenario} />
+                    padding={padding} />
                 <Axis
                     padding={padding}
                     width={width}
                     height={height}
                     xTicks={xTicks} />
-                {showTodayLineAndText && <TodayLineAndtext
+                <TodayLineAndtext
                     xScale={xScale}
+                    xDomain={xDomain}
                     height={height}
                     todaysDate={todaysDate}
-                    padding={padding}
-                    showTodayLineAndText={showTodayLineAndText} />}
+                    padding={padding} />
                 <AgencyBudgetLine
                     data={dataWithFirstAndLastCoordinate}
                     xScale={xScale}
+                    xDomain={xDomain}
                     yScale={yScale}
                     agencyBudget={agencyBudget}
                     height={height}
                     width={width}
                     todaysDate={todaysDate}
-                    padding={padding}
-                    scenario={scenario}
-                    showTodayLineAndText={showTodayLineAndText} />
-                {(scenario === 'exceedsMin' || scenario === 'exceedsMaxAndMin') && <ZeroLineAndTick
-                    xScale={xScale}
-                    yScale={yScale}
-                    height={height}
-                    padding={padding}
-                    width={width}
-                    showTodayLineAndText={showTodayLineAndText}
-                    todaysDate={todaysDate} />}
+                    padding={padding} />
             </g>
         </svg>
     );

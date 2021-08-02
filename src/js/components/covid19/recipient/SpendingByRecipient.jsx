@@ -12,7 +12,6 @@ import { fetchDisasterSpendingCount } from 'apis/disaster';
 import { areCountsDefined } from 'helpers/covid19Helper';
 import SummaryInsightsContainer from 'containers/covid19/SummaryInsightsContainer';
 import SpendingByRecipientContainer from 'containers/covid19/recipient/SpendingByRecipientContainer';
-import GlossaryLink from 'components/sharedComponents/GlossaryLink';
 import Analytics from 'helpers/analytics/Analytics';
 import { Tabs } from "data-transparency-ui";
 import { scrollIntoView } from '../../../containers/covid19/helpers/scrollHelper';
@@ -24,20 +23,12 @@ const overviewData = [
     },
     {
         type: 'awardObligations',
-        title: (
-            <div>
-                <span className="glossary-term">Award Obligations</span> <GlossaryLink term="obligation" />
-            </div>
-        ),
+        title: 'Award Obligations',
         isMonetary: true
     },
     {
         type: 'awardOutlays',
-        title: (
-            <div>
-                <span className="glossary-term">Award Outlays</span> <GlossaryLink term="outlay" />
-            </div>
-        ),
+        title: 'Award Outlays',
         isMonetary: true
     },
     {

@@ -11,6 +11,8 @@ import { POPFilterContainer } from 'containers/search/filters/location/POPFilter
 
 import { mockRedux } from './mockLocations';
 
+global.Promise = jest.requireActual('promise');
+
 jest.mock('components/search/filters/location/SelectedLocations', () =>
     jest.fn(() => null));
 jest.mock('containers/search/filters/location/LocationPickerContainer', () =>
